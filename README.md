@@ -61,7 +61,19 @@ cargo build --release --target x86_64-unknown-linux-musl
 cargo build --release --target x86_64-unknown-linux-musl
 ```
 
-### 2. Build and Push Docker Image to Docker Hub
+### 2. Generate Keys
+
+```bash
+# Generate loader key pair
+./target/x86_64-unknown-linux-musl/release/keygen --secret loader.sec --public loader.pub
+
+# Generate requester key pair
+./target/x86_64-unknown-linux-musl/release/keygen --secret requester.sec --public requester.pub
+```
+
+Keep `loader.sec` and `requester.sec` safe — these are used by the client binaries. The `.pub` files will be embedded into the Docker image.
+
+### 3. Build and Push Docker Image to Docker Hub
 
 ```bash
 # Login to Docker Hub (create account at https://hub.docker.com if needed)
@@ -76,7 +88,7 @@ docker push YOUR_DOCKERHUB_USERNAME/privacy-preserving-addition:latest
 
 **Note:** Replace `YOUR_DOCKERHUB_USERNAME` with your actual Docker Hub username.
 
-### 4. Create docker-compose.yml
+### 5. Create docker-compose.yml
 
 Create a `docker-compose.yml` file for Marlin Oyster deployment:
 
@@ -93,7 +105,7 @@ services:
 
 **Note:** The `/app/id.sec` path is where Marlin Oyster injects the enclave's identity secret key.
 
-### 5. Deploy via Marlin Oyster CVM CLI
+### 6. Deploy via Marlin Oyster CVM CLI
 
 ```bash
 # For AMD
@@ -105,7 +117,7 @@ oyster-cvm deploy --wallet-private-key <WALLET_PRIVATE_KEY> --duration-in-minute
 oyster-cvm deploy --wallet-private-key <WALLET_PRIVATE_KEY> --duration-in-minutes 35 --docker-compose docker-compose.yml
 ```
 
-### 6. Verify Attestation
+### 7. Verify Attestation
 
 ```bash
 # Verify attestation using the image ID from deployment:
@@ -117,7 +129,7 @@ cargo run --release --target x86_64-unknown-linux-musl --bin verifier -- \
 
 The image ID is computed from PCR values (PCR0, PCR1, PCR2, PCR16) and can be found in the Marlin Oyster deployment logs.
 
-### 7. Interact with Enclave
+### 8. Interact with Enclave
 
 ```bash
 # Load data
