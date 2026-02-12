@@ -1,6 +1,6 @@
 services:
   echo-server:
-    image: ayushranjan123/privacy-preserving-addition:latest
+    image: YOUR_DOCKERHUB_USERNAME/privacy-preserving-addition:latest
     network_mode: host
     restart: unless-stopped
     volumes:
