@@ -46,10 +46,10 @@ rustup target add x86_64-unknown-linux-musl
 
 ```bash
 # Build all binaries
-cargo build --release --target x86_64-unknown-linux-musl
+cargo build --release --target `uname -m`-unknown-linux-musl
 
 # Binaries will be at:
-# target/x86_64-unknown-linux-musl/release/{app,loader,requester,verifier,keygen}
+# target/`uname -m`-unknown-linux-musl/release/{app,loader,requester,verifier,keygen}
 ```
 
 ## Deploying to Marlin Oyster (AWS Nitro Enclave)
@@ -58,17 +58,17 @@ cargo build --release --target x86_64-unknown-linux-musl
 
 ```bash
 # Build all binaries with static linking
-cargo build --release --target x86_64-unknown-linux-musl
+cargo build --release --target `uname -m`-unknown-linux-musl
 ```
 
 ### 2. Generate Keys
 
 ```bash
 # Generate loader key pair
-./target/x86_64-unknown-linux-musl/release/keygen --secret loader.sec --public loader.pub
+./target/`uname -m`-unknown-linux-musl/release/keygen --secret loader.sec --public loader.pub
 
 # Generate requester key pair
-./target/x86_64-unknown-linux-musl/release/keygen --secret requester.sec --public requester.pub
+./target/`uname -m`-unknown-linux-musl/release/keygen --secret requester.sec --public requester.pub
 ```
 
 Keep `loader.sec` and `requester.sec` safe — these are used by the client binaries. The `.pub` files will be embedded into the Docker image.
@@ -88,7 +88,7 @@ docker push YOUR_DOCKERHUB_USERNAME/privacy-preserving-addition:latest
 
 **Note:** Replace `YOUR_DOCKERHUB_USERNAME` with your actual Docker Hub username.
 
-### 5. Create docker-compose.yml
+### 4. Create docker-compose.yml
 
 Create a `docker-compose.yml` file for Marlin Oyster deployment:
 
@@ -105,7 +105,7 @@ services:
 
 **Note:** The `/app/id.sec` path is where Marlin Oyster injects the enclave's identity secret key.
 
-### 6. Deploy via Marlin Oyster CVM CLI
+### 5. Deploy via Marlin Oyster CVM CLI
 
 ```bash
 # For AMD
@@ -117,11 +117,11 @@ oyster-cvm deploy --wallet-private-key <WALLET_PRIVATE_KEY> --duration-in-minute
 oyster-cvm deploy --wallet-private-key <WALLET_PRIVATE_KEY> --duration-in-minutes 35 --docker-compose docker-compose.yml
 ```
 
-### 7. Verify Attestation
+### 6. Verify Attestation
 
 ```bash
 # Verify attestation using the image ID from deployment:
-cargo run --release --target x86_64-unknown-linux-musl --bin verifier -- \
+cargo run --release --target `uname -m`-unknown-linux-musl --bin verifier -- \
   --endpoint http://ENCLAVE_IP:1300/attestation/raw \
   --image-id "IMAGE_ID_FROM_DEPLOYMENT" \
   --app app.pub
@@ -129,15 +129,15 @@ cargo run --release --target x86_64-unknown-linux-musl --bin verifier -- \
 
 The image ID is computed from PCR values (PCR0, PCR1, PCR2, PCR16) and can be found in the Marlin Oyster deployment logs.
 
-### 8. Interact with Enclave
+### 7. Interact with Enclave
 
 ```bash
 # Load data
-cargo run --release --target x86_64-unknown-linux-musl --bin loader -- \
+cargo run --release --target `uname -m`-unknown-linux-musl --bin loader -- \
   --ip-addr ENCLAVE_IP:4000 --app app.pub --secret loader.sec
 
 # Request computation result
-cargo run --release --target x86_64-unknown-linux-musl --bin requester -- \
+cargo run --release --target `uname -m`-unknown-linux-musl --bin requester -- \
   --ip-addr ENCLAVE_IP:4000 --app app.pub --secret requester.sec
 ```
 
